@@ -38,75 +38,118 @@ for (const block of programme) {
   }
 }
 
-export function App() {
-  const m = 130;
-  const colHeight = 72;
+const pad = 8;
+const hourWidth = 130;
+const colHeight = 72;
 
+const colWidth = (maxEndTimeY - minStartTimeY) * hourWidth + 340;
+
+export function App() {
   let atDate: string;
 
   return (
-    <div
-      class="p-4"
-      style={{
-        width: `${(maxEndTimeY - minStartTimeY) * m + 500}px`,
-      }}
-    >
+    <div>
       <div
-        class="p-4 text-5xl font-black"
-        style={{
-          "text-shadow": "2px 2px 0 black, 4px 4px 0 #26ddb5",
-        }}
+        class="h-screen w-screen overflow-scroll"
+        style={{ padding: `${pad}px` }}
       >
-        GO SHORT 2025
-      </div>
+        <div class="sticky top-0 h-0 z-[5]">
+          {Array.from({ length: 24 }).map((_, i) => {
+            return (
+              <div
+                class="absolute top-[-8px] h-screen z-0 w-[1px] bg-black/50"
+                style={{
+                  left: `${hourWidth * (i - minStartTimeY)}px`,
+                }}
+              />
+            );
+          })}
+        </div>
 
-      {cols.map((col, i) => {
-        const isNewDate = col.date !== atDate;
-        atDate = col.date;
+        <div
+          class="p-4 pb-8 text-5xl font-black sticky left-0 z-[10]"
+          style={{
+            "text-shadow": "2px 2px 0 black, 4px 4px 0 #26ddb5",
+          }}
+        >
+          GO SHORT 2025
+        </div>
 
-        return (
-          <>
-            {isNewDate && (
-              <div class="p-4 font-bold text-xl">
-                {format(col.date, "EEEE d LLLL", { locale: nl })}
+        <div class="sticky top-0 h-0 z-[20]">
+          {Array.from({ length: 24 }).map((_, i) => {
+            return (
+              <div
+                class="absolute top-0 text-[11px] bg-purple-900 px-[1px]"
+                style={{
+                  left: `${hourWidth * (i - minStartTimeY) + 2}px`,
+                }}
+              >
+                {i < 10 && "0"}
+                {i}:00
               </div>
-            )}
+            );
+          })}
+        </div>
 
-            <div class="relative" style={{ height: `${colHeight}px` }}>
-              {col.blocks.map((block, j) => {
-                return (
-                  <div
-                    class="absolute transition-all hover:scale-105 hover:shadow-2xl hover:z-[10] hover:outline-offset-1 hover:outline-white hover:outline-2 origin-left hover:!min-w-[340px]"
-                    style={{
-                      top: 0,
-                      left: `${(getTimeY(block.start) - minStartTimeY) * m}px`,
-                      width: `${
-                        (getTimeY(block.end) - getTimeY(block.start)) * m
-                      }px`,
-                      height: `${colHeight}px`,
-                    }}
-                  >
-                    <div class="absolute inset-[2px] flex gap-[4px] bg-[#00bb84]/90 shadow overflow-hiddn">
-                      <div
-                        class="h-full aspect-[8/7] bg-cover bg-center"
-                        style={{
-                          "background-image": `url("${block.imageUrlBase64}")`,
-                        }}
-                      ></div>
-                      <div class="grow text-[12px] leading-[14px] font-semibold text-balance">
-                        <div class="pt-[2px] whitespace-nowrap text-[11px] font-medium">
-                          {block.start}—{block.end}
+        {cols.map((col, i) => {
+          const isNewDate = col.date !== atDate;
+          atDate = col.date;
+
+          return (
+            <>
+              {isNewDate && (
+                <div class="px-4 flex items-center h-[100px] font-bold text-2xl sticky left-0 z-[10]">
+                  {format(col.date, "EEEE d LLLL", { locale: nl })}
+                </div>
+              )}
+
+              <div
+                class="relative z-[10]"
+                style={{
+                  height: `${colHeight}px`,
+                  width: `${colWidth}px`,
+                }}
+              >
+                {col.blocks.map((block) => {
+                  return (
+                    <a
+                      href={block.url}
+                      target="_blank"
+                      class="absolute transition-all hover:scale-105 hover:shadow-2xl hover:z-[10] hover:outline-offset-1 hover:outline-white hover:outline-2 origin-left hover:!min-w-[340px]"
+                      style={{
+                        top: 0,
+                        left: `${
+                          (getTimeY(block.start) - minStartTimeY) * hourWidth
+                        }px`,
+                        width: `${
+                          (getTimeY(block.end) - getTimeY(block.start)) *
+                          hourWidth
+                        }px`,
+                        height: `${colHeight}px`,
+                      }}
+                    >
+                      <div class="absolute inset-[2px] flex gap-[4px] bg-[#00bb84]/90 shadow overflow-hiddn">
+                        <div
+                          class="h-full aspect-[8/7] bg-cover bg-center"
+                          style={{
+                            "background-image": `url("${block.imageUrlBase64}")`,
+                          }}
+                        ></div>
+                        <div class="grow text-[12px] leading-[14px] font-semibold text-balance">
+                          <div class="pt-[2px] whitespace-nowrap text-[11px] font-medium">
+                            {block.start}—{block.end}
+                          </div>
+                          <div class="mt-[2px] text-balance">{block.title}</div>
                         </div>
-                        <div class="mt-[2px] text-balance">{block.title}</div>
                       </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        );
-      })}
+                    </a>
+                  );
+                })}
+              </div>
+            </>
+          );
+        })}
+      </div>
     </div>
   );
 }
