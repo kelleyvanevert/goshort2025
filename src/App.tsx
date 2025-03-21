@@ -1,4 +1,6 @@
-import { createSignal } from "solid-js";
+import { nl } from "date-fns/locale/nl";
+import { format } from "date-fns";
+
 import programme from "./programme.json";
 
 type Block = (typeof programme)[number];
@@ -37,59 +39,74 @@ for (const block of programme) {
 }
 
 export function App() {
-  return (
-    <div class="fixed inset-8">
-      <Programme />
-    </div>
-  );
-}
+  const m = 130;
+  const colHeight = 72;
 
-const getYPercent = (time: string) => {
-  const y = getTimeY(time);
-  return ((y - minStartTimeY) * 100) / (maxEndTimeY - minStartTimeY);
-};
-
-function Programme() {
-  const numCols = cols.length;
-  const colWidthPercent = 100 / numCols;
+  let atDate: string;
 
   return (
-    <>
+    <div
+      class="p-4"
+      style={{
+        width: `${(maxEndTimeY - minStartTimeY) * m + 500}px`,
+      }}
+    >
+      <div
+        class="p-4 text-5xl font-black"
+        style={{
+          "text-shadow": "2px 2px 0 black, 4px 4px 0 #26ddb5",
+        }}
+      >
+        GO SHORT 2025
+      </div>
+
       {cols.map((col, i) => {
+        const isNewDate = col.date !== atDate;
+        atDate = col.date;
+
         return (
           <>
-            {col.blocks.map((block) => {
-              const titleWords = block.title.split(" ");
-              const splitAt = Math.floor(titleWords.length / 2);
-              const titleLineA = titleWords.slice(0, splitAt).join(" ");
-              const titleLineB = titleWords.slice(splitAt).join(" ");
+            {isNewDate && (
+              <div class="p-4 font-bold text-xl">
+                {format(col.date, "EEEE d LLLL", { locale: nl })}
+              </div>
+            )}
 
-              return (
-                <div
-                  style={{
-                    left: `${i * colWidthPercent}%`,
-                    width: `${colWidthPercent}%`,
-                    top: `${getYPercent(block.start)}%`,
-                    height: `${
-                      ((getTimeY(block.end) - getTimeY(block.start)) * 100) /
-                      (maxEndTimeY - minStartTimeY)
-                    }%`,
-                  }}
-                  class="absolute"
-                >
-                  <div class="absolute inset-[1px] bg-amber-400">
-                    <img src={block.imageUrl} class="w-full h-auto" />
-                    <div class="absolute top-full text-[8px] leading-[9px] font-bold transform-gpu origin-top-left -rotate-90">
-                      <div class="whitespace-nowrap">{titleLineA}</div>
-                      <div class="whitespace-nowrap">{titleLineB}</div>
+            <div class="relative" style={{ height: `${colHeight}px` }}>
+              {col.blocks.map((block, j) => {
+                return (
+                  <div
+                    class="absolute transition-all hover:scale-105 hover:shadow-2xl hover:z-[10] hover:outline-offset-1 hover:outline-white hover:outline-2 origin-left hover:!min-w-[340px]"
+                    style={{
+                      top: 0,
+                      left: `${(getTimeY(block.start) - minStartTimeY) * m}px`,
+                      width: `${
+                        (getTimeY(block.end) - getTimeY(block.start)) * m
+                      }px`,
+                      height: `${colHeight}px`,
+                    }}
+                  >
+                    <div class="absolute inset-[2px] flex gap-[4px] bg-[#00bb84]/90 shadow overflow-hiddn">
+                      <div
+                        class="h-full aspect-[8/7] bg-cover bg-center"
+                        style={{
+                          "background-image": `url("${block.imageUrlBase64}")`,
+                        }}
+                      ></div>
+                      <div class="grow text-[12px] leading-[14px] font-semibold text-balance">
+                        <div class="pt-[2px] whitespace-nowrap text-[11px] font-medium">
+                          {block.start}—{block.end}
+                        </div>
+                        <div class="mt-[2px] text-balance">{block.title}</div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </>
         );
       })}
-    </>
+    </div>
   );
 }

@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.15",
+    "date-fns": "^4.1.0",
+    "sharp": "^0.33.5",
     "solid-js": "^1.9.5",
     "tailwindcss": "^4.0.15"
   },
